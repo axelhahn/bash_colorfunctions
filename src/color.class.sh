@@ -1,0 +1,339 @@
+#!/bin/bash
+# ======================================================================
+#
+# COLORS
+#
+# a few shell functions for colored output
+#
+# ----------------------------------------------------------------------
+#
+# ----------------------------------------------------------------------
+# 2023-08-06  ahahn  0.1  initial lines
+# ======================================================================
+
+_VERSION=0.1
+COLOR_DEBUG=0
+
+# ----------------------------------------------------------------------
+# CONSTANTS
+# ----------------------------------------------------------------------
+
+declare -A COLOR_CODE
+declare -A BGCOLOR_CODE
+
+# foreground colors
+COLOR_CODE[black]="30"
+COLOR_CODE[red]="31"
+COLOR_CODE[green]="32"
+COLOR_CODE[brown]="33"
+COLOR_CODE[blue]="34"
+COLOR_CODE[purple]="35"
+COLOR_CODE[cyan]="36"
+COLOR_CODE[lightgray]="37"
+COLOR_CODE[darkgray]="1;30"
+COLOR_CODE[lightred]="1;31"
+COLOR_CODE[lightgreen]="1;32"
+COLOR_CODE[yellow]="1;33"
+COLOR_CODE[lightblue]="1;34"
+COLOR_CODE[lightpurple]="1;35"
+COLOR_CODE[lightcyan]="1;36"
+COLOR_CODE[white]="1;37"
+
+# background colors
+BGCOLOR_CODE[black]="40"
+BGCOLOR_CODE[red]="41"
+BGCOLOR_CODE[green]="42"
+BGCOLOR_CODE[brown]="43"
+BGCOLOR_CODE[blue]="44"
+BGCOLOR_CODE[purple]="45"
+BGCOLOR_CODE[cyan]="46"
+BGCOLOR_CODE[lightgray]="47"
+BGCOLOR_CODE[darkgray]="1;40"
+BGCOLOR_CODE[lightred]="1;41"
+BGCOLOR_CODE[lightgreen]="1;42"
+BGCOLOR_CODE[yellow]="1;43"
+BGCOLOR_CODE[lightblue]="1;44"
+BGCOLOR_CODE[lightpurple]="1;45"
+BGCOLOR_CODE[lightcyan]="1;46"
+BGCOLOR_CODE[white]="1;47"
+
+
+# ----------------------------------------------------------------------
+# PRIVATE FUNCTIONS
+# ----------------------------------------------------------------------
+
+function color.__wd(){
+    test "$COLOR_DEBUG" = "1" && echo "DEBUG: $*"
+}
+
+function color.__iscolorname(){
+    test -n "${COLOR_CODE[$1]}" && return 0
+    return 1
+}
+function color.__iscolorcode(){
+    test "$1" = "0" && return 0
+    test "$1" = "1" && return 0
+    test "$1" = "2" && return 0
+    test "$1" = "3" && return 0
+    test "$1" = "4" && return 0
+    test "$1" = "5" && return 0
+    test "$1" = "6" && return 0
+    test "$1" = "7" && return 0
+    return 1
+}
+function color.__iscolorvalue(){
+    if grep -E "^([01];|)[34][0-7]$" <<< "$1" ; then
+        return 0
+    fi
+    return 1
+}
+function color.__isacolor(){
+    if color.__iscolorname "$1"; then return 0; fi
+    if color.__iscolorcode "$1"; then return 0; fi
+    if color.__iscolorvalue "$1"; then return 0; fi
+    color.__wd "is acolor: $1 --> No"
+    return 1
+}
+
+# set foreground 
+# param  string  color 0..7 OR color name eg "black" or a valid color value eg "1;30"
+# param  integr  3 for for foreground or 4 for background colors
+function color.__fgorbg(){
+    local _color="$1"
+    local _prefix="$2"
+    if color.__iscolorname "${_color}"; then
+        color.__wd "yep, ${_color} is a color name."
+        test "$_prefix" = "3" && color.set "${COLOR_CODE[${_color}]}"
+        test "$_prefix" = "4" && color.set "${BGCOLOR_CODE[${_color}]}"
+    else
+        if color.__iscolorcode "${_color}"; then
+            color.__wd "yep, ${_color} is a color code."
+        else
+            if color.__iscolorvalue "${_color}"; then
+                color.__wd "yep, ${_color} is a color value."
+                color.set "${_color}"
+            else
+                >&2 echo "ERROR: color '${_color}' is not a name nor a value between 0..7 nor a valid color value."
+            fi
+        fi
+    fi
+}
+# ----------------------------------------------------------------------
+# FUNCTIONS
+# ----------------------------------------------------------------------
+
+# show help
+function color.help(){
+    local _self; _self=$( basename $0 )
+    color.reset
+    local _debug=$COLOR_DEBUG
+    COLOR_DEBUG=0
+
+    echo "_______________________________________________________________________________"
+    echo
+    color.echo "red"      "   ###   ###  #      ###  ####"
+    color.echo "yellow"   "  #     #   # #     #   # #   #"
+    color.echo "white"    "  #     #   # #     #   # ####"
+    color.echo "yellow"   "  #     #   # #     #   # #  #"
+    color.echo "red"      "   ###   ###  #####  ###  #   #"
+    echo "_________________________________________________________________________/ v$_VERSION"
+    echo
+
+    sed "s#^    ##g" << EOH
+    HELP:
+      color is a class like component for setting colors in your bash scripts.
+
+      Author: Axel Hahn
+      License: GNU GPL 3.0
+      Source: <https://github.com/axelhahn/bash_colorfunctions>
+
+    FUNCTIONS:
+
+      ---------- Information:
+
+      color.help       this help
+      color.list       show a table with valid color names
+
+
+      ---------- Colored output:
+
+      color.bg COLOR (COLOR2)
+                       set a background color; a 2nd parameter is optional to set
+                       a foreground color too
+      color.fg COLOR (COLOR2)
+                       set a foreground color; a 2nd parameter is optional to set
+                       a background color too
+      color.echo COLOR (COLOR2) TEXT
+                       write a colored text with carriage return and reset colors
+                       The 1st param must be a COLOR(code/ name) for the 
+                       foreground. The 2nd CAN be a color for the background, but 
+                       can be skipped. Everything behind is text for the output.
+      color.print COLOR (COLOR2) TEXT
+                       see color.echo - the same but without carriage return.
+      color.reset      reset colors
+      color.set RAWCOLOR (RAWCOLOR2 (... RAWCOLOR_N))
+                       set ansi colors; it can handle multiple color values
+
+
+      ---------- Other:
+
+      color.bold       start bold text
+      color.underline  start underline text
+      color.blink      start blinking text
+      color.invert     start inverted text
+      color.ansi ID    set ansi command
+
+    VALUES:
+      COLOR            a color; it can be...
+                       - a color keyword, eg black, blue, red, ... for all
+                         known values run color.list
+                       - a value 0..7 to set simple colors 30..37 (or 40..47)
+                       - an ansi color value eg. "30" or "1;42"
+      RAWCOLOR         an ansi color value eg. "30" or "1;42"
+
+    EXAMPLES:
+      First you need to source the file $_self.
+
+      (1)
+      Show output of the command 'ls -l' in blue
+        color.fg "blue"
+        ls -l
+        color.reset
+
+      (2)
+      show a red error message
+        color.echo "red" "ERROR: Something bad happened."
+
+EOH
+
+    COLOR_DEBUG=$_debug
+}
+
+# a little helper: show colors and the color codes
+function color.list(){
+    color.reset
+    local _debug=$COLOR_DEBUG
+    COLOR_DEBUG=0
+
+    echo "--------------------------------------------------"
+    echo "color          | foreground         | background"
+    echo "--------------------------------------------------"
+    for i in "${!COLOR_CODE[@]}"
+    do
+        printf "%-15s %4s " $i ${COLOR_CODE[$i]} 
+        color.set "${COLOR_CODE[$i]}"
+        color.set "40"
+        printf " Test "
+
+        color.set "1;47"
+        color.set "${COLOR_CODE[$i]}"
+        printf " Test "
+        color.reset
+
+        printf "   %5s " ${BGCOLOR_CODE[$i]} 
+        color.set ${BGCOLOR_CODE[$i]}
+        printf " Test "
+        color.reset
+        echo
+
+    done | sort
+    color.reset
+    echo "--------------------------------------------------"
+    COLOR_DEBUG=$_debug
+}
+
+# ----------------------------------------------------------------------
+
+# set background color
+# param  string  backround color 0..7 OR color name eg "black" or a valid color value eg "1;30"
+# param  string  optional: foreground color
+function color.bg(){
+    color.__wd "color.bg $1"
+    color.__fgorbg "$1" 4
+    test -n "$2" && color.fg "$2"
+}
+
+# set foreground color
+# param  string  foreground color 0..7 OR color name eg "black" or a valid color value eg "1;30"
+# param  string  optional: background color
+function color.fg(){
+    color.__wd "color.fg $1"
+    color.__fgorbg "$1" 3
+    test -n "$2" && color.bg "$2"
+}
+
+# show a colored text without carriage return
+# param  string  foreground color as code / name / value
+# param  string  optional: background color as code / name / value
+# param  string  text to print
+function color.print(){
+    if color.__isacolor "$1"; then
+        if color.__isacolor "$2"; then
+            color.fg "$1" "$2"
+            shift 1
+            shift 1
+        else
+            color.fg "$1"
+            shift 1
+        fi
+        echo -n "$*"
+        color.reset
+    fi
+}
+
+# show a colored text WITH carriage return
+# param  string  foreground color as code / name / value
+# param  string  optional: background color as code / name / value
+# param  string  text to print
+function color.echo(){
+    local _param1="$1"
+    local _param2="$2"
+    shift 1
+    shift 1
+    color.print "$_param1" "$_param2" "$*"
+    echo
+}
+
+# ----------------------------------------------------------------------
+
+# rest all colors to terminal default
+function color.reset(){
+    color.set "0"
+}
+
+function color.bold(){
+    color.set "1"
+}
+function color.underline(){
+    color.set "4"
+}
+function color.blink(){
+    color.set "5"
+}
+function color.invert(){
+    color.set "7"
+}
+
+# set Ansi code
+# - 0 	Normal Characters
+# - 1 	Bold Characters
+# - 4 	Underlined Characters
+# - 5 	Blinking Characters
+# - 7 	Reverse video Characters
+function color.ansi(){
+    color.set "$1"
+}
+
+# ----------------------------------------------------------------------
+
+function color.set(){
+    local _out=
+    for mycolor in $*
+    do
+        color.__wd "color.set: processing ${mycolor}"
+        _out+="${mycolor}m"
+    done
+    echo -en "\e[${_out}"
+}
+
+# ======================================================================
