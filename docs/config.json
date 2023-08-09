@@ -1,0 +1,26 @@
+{
+    "title": "Colorfunctions",
+    "author": "Axel Hahn",
+    "tagline": "Bash functions in class like style to handle ansi colors in your script",
+    "ignore": {
+        "files": ["30_PHP-client/Plugins/Checks/_skeleton.md"],
+        "folders": ["99_Not_Ready"]
+    },
+    "html": {
+        "auto_toc": true,
+        "auto_landing": false,
+        "date_modified": false,
+        "jump_buttons": true,
+        "edit_on_github": "axelhahn/bash_colorfunctions/tree/main/docs",
+        "edit_on_": {
+            "name": "Gitlab",
+            "basepath": "https://git-repo.iml.unibe.ch/iml-open-source/__PROJECT__/tree/master/docs"
+        },
+        "links": {
+            "Git Repo": "__GITURL__",
+            "Axels Docs": "https://www.axel-hahn.de/docs/"
+        },
+        "theme": "daux-blue",
+        "search": true
+    }
+}
