@@ -82,7 +82,7 @@ function color.__iscolorcode(){
     return 1
 }
 function color.__iscolorvalue(){
-    if grep -E "^([01];|)[34][0-7]$" <<< "$1" ; then
+    if grep -E "^([01];|)[34][0-7]$" >/dev/null <<< "$1" ; then
         return 0
     fi
     return 1
