@@ -5,7 +5,7 @@ Free software and Open source.
 👤 Author: Axel Hahn \
 📄 Source: <https://github.com/axelhahn/bash_colorfunctions> \
 📜 License: GNU GPL 3.0 \
-📗 Docs: coming soon
+📗 Docs: see <https://www.axel-hahn.de/docs/bash_colorfunctions>
 
 
 This is work in progress.

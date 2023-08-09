@@ -10,4 +10,4 @@
 👤 Author: Axel Hahn\
 🧾 Source: <https://github.com/axelhahn/bash_colorfunctions/>\
 📜 License: GNU GPL 3.0\
-📗 Docs: see <https://www.axel-hahn.de/docs/bash_colorfunctionsr/>
+📗 Docs: see <https://www.axel-hahn.de/docs/bash_colorfunctions/>
