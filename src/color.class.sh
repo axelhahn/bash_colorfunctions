@@ -12,9 +12,10 @@
 # 2023-08-09  ahahn  0.1  initial lines
 # 2023-08-09  ahahn  0.2  hide output of regex test with grep
 # 2023-08-13  ahahn  0.3  introduce of color presets with foreground and background
+# 2023-08-13  ahahn  0.4  list presets
 # ======================================================================
 
-_VERSION=0.3
+_VERSION=0.4
 COLOR_DEBUG=0
 
 # ----------------------------------------------------------------------
@@ -61,11 +62,12 @@ COLOR_CODE[lightcyan]="1;36"
 COLOR_CODE[white]="1;37"
 
 # custom presets as array of foreground and background color
-#            +--- label is part of the variable
-#            |
-#            v
-COLOR_PRESET_error=("white" "red")
-COLOR_PRESET_ok=("white" "green")
+#
+#              +--- the label is part of the variable
+#              |
+#              v
+# COLOR_PRESET_error=("white" "red")
+# COLOR_PRESET_ok=("white" "green")
 
 # ----------------------------------------------------------------------
 # PRIVATE FUNCTIONS
@@ -154,7 +156,7 @@ function color.__fgorbg(){
 }
 
 # ----------------------------------------------------------------------
-# FUNCTIONS
+# FUNCTIONS :: helpers
 # ----------------------------------------------------------------------
 
 # show help
@@ -188,7 +190,7 @@ function color.help(){
 
       color.help       this help
       color.list       show a table with valid color names
-
+      color.presets    show a table with defined custom presets
 
       ---------- Colored output:
 
@@ -198,12 +200,14 @@ function color.help(){
       color.fg COLOR (COLOR2)
                        set a foreground color; a 2nd parameter is optional to set
                        a background color too
-      color.echo COLOR (COLOR2) TEXT
+      color.echo COLOR|PRESET (COLOR2) TEXT
                        write a colored text with carriage return and reset colors
                        The 1st param must be a COLOR(code/ name) for the 
-                       foreground. The 2nd CAN be a color for the background, but 
-                       can be skipped. Everything behind is text for the output.
-      color.print COLOR (COLOR2) TEXT
+                       foreground or a label of a preset.
+                       The 2nd CAN be a color for the background, but can be 
+                       skipped.
+                       Everything behind is text for the output.
+      color.print COLOR|PRESET (COLOR2) TEXT
                        see color.echo - the same but without carriage return.
       color.reset      reset colors
       color.set RAWCOLOR (RAWCOLOR2 (... RAWCOLOR_N))
@@ -224,10 +228,30 @@ function color.help(){
                          known values run color.list
                        - a value 0..7 to set simple colors 30..37 (or 40..47)
                        - an ansi color value eg. "30" or "1;42"
-      RAWCOLOR         an ansi color value eg. "30" or "1;42"
+      PRESET           a shortcut for a combination of foreground + background
+                       color. 
+                       COLOR_PRESET_<LABEL>=(<FOREGROUND> <BACKGROUND>)
+
+                       example:
+                       COLOR_PRESET_error=("white" "red")
+      RAWCOLOR         an ansi color value eg. "30" (black foreground) or 
+                       "1;42" (lightgreen background)
+
+    DEFINE PRESETS:    A shortcut for a combination of foreground + background
+                       color. The label ist part of a bash variable with the
+                       prefix 'COLOR_PRESET_'.
+                       The value is a bash array with 2 colors for foreground
+                       and background. See the value description for COLOR
+                       above.
+
+                       SYNTAX:
+                       COLOR_PRESET_<LABEL>=(<FOREGROUND> <BACKGROUND>)
+
+                       To see all defined presets use 'color.presets'
 
     EXAMPLES:
       First you need to source the file $_self.
+    . $_self
 
       (1)
       Show output of the command 'ls -l' in blue
@@ -239,6 +263,14 @@ function color.help(){
       show a red error message
         color.echo "red" "ERROR: Something bad happened."
 
+      (3)
+      Use a custom preset:
+        COLOR_PRESET_error=("white" "red")
+        color.echo "error" "ERROR: Something bad happened."
+
+      This defines a preset named "error". "white" is a colorname
+      for the foreground color, "red" ist the background.
+
 EOH
 
     COLOR_DEBUG=$_debug
@@ -249,6 +281,10 @@ function color.list(){
     color.reset
     local _debug=$COLOR_DEBUG
     COLOR_DEBUG=0
+
+    echo
+    echo "List of colors:"
+    echo
 
     echo "--------------------------------------------------"
     echo "color          | foreground         | background"
@@ -274,9 +310,51 @@ function color.list(){
     done | sort
     color.reset
     echo "--------------------------------------------------"
+    echo
     COLOR_DEBUG=$_debug
 }
 
+function color.presets(){
+    local _label
+    local _value
+    local _colorvar
+    local _fg
+    local _bg
+
+    color.reset
+    local _debug=$COLOR_DEBUG
+    COLOR_DEBUG=0
+
+    if ! set | grep "^COLOR_PRESET_.*=(" >/dev/null; then
+        echo "INFO: No preset was defined yet."
+        echo "To set one define shell variables with an array of 2 colors:"
+        echo "  COLOR_PRESET_<LABEL>=(<FOREGROUND> <BACKGROUND>)"
+        echo "For more help call 'color.help' or see the docs."
+    else
+        echo
+        echo "List of presets:"
+        echo
+        echo "---------------------------------------------------------------------"
+        echo "label      | foreground | background | example"
+        echo "---------------------------------------------------------------------"
+
+        set | grep "^COLOR_PRESET_.*=(" | while read line
+        do
+            _label=$( cut -f 1 -d '=' <<< $line | cut -f 3- -d '_')
+            _example=$( color.print $_label "example for peset '$_label'" )
+            _colorvar="COLOR_PRESET_${_label}" 
+            eval "_fg=\${$_colorvar[0]}"
+            eval "_bg=\${$_colorvar[1]}"
+
+            printf "%-10s | %-10s | %-10s | %-50s\n"  $_label "${_fg}" "${_bg}" "$_example"
+        done
+        echo "---------------------------------------------------------------------"
+        echo
+    fi
+    COLOR_DEBUG=$_debug
+}
+# ----------------------------------------------------------------------
+# FUNCTIONS :: set color
 # ----------------------------------------------------------------------
 
 # set background color
@@ -296,6 +374,55 @@ function color.fg(){
     color.__fgorbg "$1" 3
     test -n "$2" && color.bg "$2"
 }
+
+# ----------------------------------------------------------------------
+
+# rest all colors to terminal default
+function color.reset(){
+    color.set "0"
+}
+
+function color.bold(){
+    color.set "1"
+}
+function color.underline(){
+    color.set "4"
+}
+function color.blink(){
+    color.set "5"
+}
+function color.invert(){
+    color.set "7"
+}
+
+# set Ansi code
+# - 0 	Normal Characters
+# - 1 	Bold Characters
+# - 4 	Underlined Characters
+# - 5 	Blinking Characters
+# - 7 	Reverse video Characters
+function color.ansi(){
+    color.set "$1"
+}
+
+# ----------------------------------------------------------------------
+
+# write ansicode to set color combination
+# param  string  color 1 as ansi value
+# param  string  color N as ansi value
+function color.set(){
+    local _out=
+    for mycolor in $*
+    do
+        color.__wd "color.set: processing ${mycolor}"
+        _out+="${mycolor}m"
+    done
+    echo -en "\e[${_out}"
+}
+
+# ----------------------------------------------------------------------
+# FUNCTIONS :: print
+# ----------------------------------------------------------------------
 
 # show a colored text without carriage return
 # param  string  foreground color as code / name / value or preset
@@ -340,47 +467,5 @@ function color.echo(){
     echo
 }
 
-# ----------------------------------------------------------------------
-
-# rest all colors to terminal default
-function color.reset(){
-    color.set "0"
-}
-
-function color.bold(){
-    color.set "1"
-}
-function color.underline(){
-    color.set "4"
-}
-function color.blink(){
-    color.set "5"
-}
-function color.invert(){
-    color.set "7"
-}
-
-# set Ansi code
-# - 0 	Normal Characters
-# - 1 	Bold Characters
-# - 4 	Underlined Characters
-# - 5 	Blinking Characters
-# - 7 	Reverse video Characters
-function color.ansi(){
-    color.set "$1"
-}
-
-# ----------------------------------------------------------------------
-
-# write ansicode to set color combination
-function color.set(){
-    local _out=
-    for mycolor in $*
-    do
-        color.__wd "color.set: processing ${mycolor}"
-        _out+="${mycolor}m"
-    done
-    echo -en "\e[${_out}"
-}
 
 # ======================================================================
