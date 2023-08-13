@@ -10,10 +10,14 @@ _______________________________________________________________________________
   #     #   # #     #   # #### 
   #     #   # #     #   # #  # 
    ###   ###  #####  ###  #   # 
-_________________________________________________________________________/ v0.1
+_________________________________________________________________________/ v0.3
 
 HELP:
   color is a class like component for setting colors in your bash scripts.
+
+  Author: Axel Hahn
+  License: GNU GPL 3.0
+  Source: <https://github.com/axelhahn/bash_colorfunctions>
 
 FUNCTIONS:
 
@@ -60,7 +64,7 @@ VALUES:
   RAWCOLOR         an ansi color value eg. "30" or "1;42"
 
 EXAMPLES:
-  First you need to source the file colortest.sh.
+  First you need to source the file bash.
 
   (1)
   Show output of the command 'ls -l' in blue

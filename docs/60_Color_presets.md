@@ -2,9 +2,10 @@
 
 ### Define presets
 
-A color preset is an array with foreground and background color.
+A color preset is a shortcut with a wanted label for a combination of foreground and background color.
 
 A preset label is part of a variable behind a prefix `COLOR_PRESET_`.
+The color values are written as array where the foreground is the 1st parameter and the optional background must be the 2nd.
 
 In your script define add one variable per preset like that:
 
@@ -16,6 +17,8 @@ In your script define add one variable per preset like that:
 COLOR_PRESET_error=("white" "red")
 COLOR_PRESET_ok=("white" "green")
 ```
+
+This defines the labels "error" and "ok".
 
 ### Usage
 
