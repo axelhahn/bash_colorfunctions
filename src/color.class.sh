@@ -8,15 +8,18 @@
 # ----------------------------------------------------------------------
 # License: GPL 3.0
 # Docs https://www.axel-hahn.de/docs/bash_colorfunctions/
+#
+# TODO:
+# - rgb colors -> https://unix.stackexchange.com/questions/269077/tput-setaf-color-table-how-to-determine-color-codes
 # ----------------------------------------------------------------------
 # 2023-08-09  ahahn  0.1  initial lines
 # 2023-08-09  ahahn  0.2  hide output of regex test with grep
 # 2023-08-13  ahahn  0.3  introduce of color presets with foreground and background
-# 2023-08-13  ahahn  0.4  list presets
+# 2023-08-13  ahahn  0.4  list presets, debug, count of colors
 # ======================================================================
 
 _VERSION=0.4
-COLOR_DEBUG=0
+typeset -i COLOR_DEBUG; COLOR_DEBUG=0
 
 # ----------------------------------------------------------------------
 # CONSTANTS
@@ -74,9 +77,10 @@ COLOR_CODE[white]="1;37"
 # ----------------------------------------------------------------------
 
 # write debug output - if debugging is enabled
+# Its output is written to STDERR
 # param  string  text to show
 function color.__wd(){
-    test "$COLOR_DEBUG" = "1" && echo "DEBUG: $*"
+    test "$COLOR_DEBUG" = "1" && >&2 echo "DEBUG: $*"
 }
 
 # test, if given value is a known color name
@@ -159,9 +163,36 @@ function color.__fgorbg(){
 # FUNCTIONS :: helpers
 # ----------------------------------------------------------------------
 
+# get count of colors in the current terminal
+function color.count(){
+    tput colors
+}
+
+# enable debug flag
+function color.debugon(){
+    COLOR_DEBUG=1
+    color.__wd "color.debugon - debugging is enabled now"
+}
+
+# disable debug flag
+function color.debugoff(){
+    color.__wd "color.debugoff - disabling debugging now"
+    COLOR_DEBUG=0
+}
+
+# show debugging status
+function color.debugstatus(){
+    echo -n "INFO: color.debug - debugging is "
+    if [ $COLOR_DEBUG -eq 0 ]; then
+        echo "DISABLED"
+    else
+        echo "ENABLED"
+    fi
+}
+
 # show help
 function color.help(){
-    local _self; _self=$( basename $0 )
+    local _self; _self='[path]/color.class.sh'
     color.reset
     local _debug=$COLOR_DEBUG
     COLOR_DEBUG=0
@@ -184,6 +215,7 @@ function color.help(){
       License: GNU GPL 3.0
       Source: <https://github.com/axelhahn/bash_colorfunctions>
 
+
     FUNCTIONS:
 
       ---------- Information:
@@ -191,6 +223,12 @@ function color.help(){
       color.help       this help
       color.list       show a table with valid color names
       color.presets    show a table with defined custom presets
+
+      color.count      get count of colors in the current terminal
+
+      color.debugon    enable debugging
+      color.debugoff   disable debugging
+      color.debugstatus  show debugstatus
 
       ---------- Colored output:
 
@@ -225,8 +263,8 @@ function color.help(){
     VALUES:
       COLOR            a color; it can be...
                        - a color keyword, eg black, blue, red, ... for all
-                         known values run color.list
-                       - a value 0..7 to set simple colors 30..37 (or 40..47)
+                         known values run 'color.list'
+                       - a value 0..7 to set basic colors 30..37 (or 40..47)
                        - an ansi color value eg. "30" or "1;42"
       PRESET           a shortcut for a combination of foreground + background
                        color. 
@@ -237,21 +275,22 @@ function color.help(){
       RAWCOLOR         an ansi color value eg. "30" (black foreground) or 
                        "1;42" (lightgreen background)
 
-    DEFINE PRESETS:    A shortcut for a combination of foreground + background
-                       color. The label ist part of a bash variable with the
-                       prefix 'COLOR_PRESET_'.
-                       The value is a bash array with 2 colors for foreground
-                       and background. See the value description for COLOR
-                       above.
 
-                       SYNTAX:
-                       COLOR_PRESET_<LABEL>=(<FOREGROUND> <BACKGROUND>)
+    DEFINE PRESETS:
+      A shortcut for a combination of foreground + background color. The label
+      ist part of a bash variable with the prefix 'COLOR_PRESET_'.
+      The value is a bash array with 2 colors for foreground and background. 
+      See the value description for COLOR above.
 
-                       To see all defined presets use 'color.presets'
+      SYNTAX:
+      COLOR_PRESET_<LABEL>=(<FOREGROUND> <BACKGROUND>)
+
+      To see all defined presets use 'color.presets'
+
 
     EXAMPLES:
       First you need to source the file $_self.
-    . $_self
+      . $_self
 
       (1)
       Show output of the command 'ls -l' in blue
@@ -414,7 +453,7 @@ function color.set(){
     local _out=
     for mycolor in $*
     do
-        color.__wd "color.set: processing ${mycolor}"
+        color.__wd "color.set: processing color value '${mycolor}'"
         _out+="${mycolor}m"
     done
     echo -en "\e[${_out}"
@@ -423,6 +462,20 @@ function color.set(){
 # ----------------------------------------------------------------------
 # FUNCTIONS :: print
 # ----------------------------------------------------------------------
+
+# show a colored text WITH carriage return
+# param  string  foreground color as code / name / value
+# param  string  optional: background color as code / name / value
+# param  string  text to print
+function color.echo(){
+    color.__wd "color.echo $*"
+    local _param1="$1"
+    local _param2="$2"
+    shift 1
+    shift 1
+    color.print "$_param1" "$_param2" "$*"
+    echo
+}
 
 # show a colored text without carriage return
 # param  string  foreground color as code / name / value or preset
@@ -452,20 +505,5 @@ function color.print(){
         >&2 echo -n "ERROR: Wrong color values detected. Command: colors.print $*"
     fi
 }
-
-# show a colored text WITH carriage return
-# param  string  foreground color as code / name / value
-# param  string  optional: background color as code / name / value
-# param  string  text to print
-function color.echo(){
-    color.__wd "color.echo $*"
-    local _param1="$1"
-    local _param2="$2"
-    shift 1
-    shift 1
-    color.print "$_param1" "$_param2" "$*"
-    echo
-}
-
 
 # ======================================================================
