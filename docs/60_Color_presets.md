@@ -9,7 +9,7 @@ The color values are written as array where the foreground is the 1st parameter 
 
 In your script define add one variable per preset like that:
 
-```txt
+```shell
 # custom presets as array of foreground and background color
 #
 #            +--- the label is part of the variable
