@@ -22,8 +22,29 @@ echo -n "Fehler"
 color.reset
 echo "jjj"
 
+color.echo "blue" "white" "blue on white"
 
+echo
+echo "Test mit Presets:"
 
+color.echo "error" "Test preset error"
+color.echo "unknown" "Test preset unknown"
+color.echo "ok" "Test preset OK"
+
+echo
+echo "Test mit ANSI"
+
+color.ansi 4
+echo "hello"
+
+color.debug
+
+color.debugon
+color.debug
+color.bold
+echo "I am bold"
+color.debugoff
+color.reset
 
 echo
 echo done

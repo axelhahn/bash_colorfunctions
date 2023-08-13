@@ -3,6 +3,7 @@
 To see all available color functions you can call `color.help`
 
 ```txt
+$ . ./src/color.class.sh ; color.help
 _______________________________________________________________________________
 
    ###   ###  #      ###  #### 
@@ -19,6 +20,7 @@ HELP:
   License: GNU GPL 3.0
   Source: <https://github.com/axelhahn/bash_colorfunctions>
 
+
 FUNCTIONS:
 
   ---------- Information:
@@ -26,6 +28,12 @@ FUNCTIONS:
   color.help       this help
   color.list       show a table with valid color names
   color.presets    show a table with defined custom presets
+
+  color.count      get count of colors in the current terminal
+
+  color.debugon    enable debugging
+  color.debugoff   disable debugging
+  color.debugstatus  show debugstatus
 
   ---------- Colored output:
 
@@ -60,8 +68,8 @@ FUNCTIONS:
 VALUES:
   COLOR            a color; it can be...
                    - a color keyword, eg black, blue, red, ... for all
-                     known values run color.list
-                   - a value 0..7 to set simple colors 30..37 (or 40..47)
+                     known values run 'color.list'
+                   - a value 0..7 to set basic colors 30..37 (or 40..47)
                    - an ansi color value eg. "30" or "1;42"
   PRESET           a shortcut for a combination of foreground + background
                    color. 
@@ -72,20 +80,21 @@ VALUES:
   RAWCOLOR         an ansi color value eg. "30" (black foreground) or 
                    "1;42" (lightgreen background)
 
-DEFINE PRESETS:    A shortcut for a combination of foreground + background
-                   color. The label ist part of a bash variable with the
-                   prefix 'COLOR_PRESET_'.
-                   The value is a bash array with 2 colors for foreground
-                   and background. See the value description for COLOR
-                   above.
 
-                   SYNTAX:
-                   COLOR_PRESET_<LABEL>=(<FOREGROUND> <BACKGROUND>)
+DEFINE PRESETS:
+  A shortcut for a combination of foreground + background color. The label
+  ist part of a bash variable with the prefix 'COLOR_PRESET_'.
+  The value is a bash array with 2 colors for foreground and background. 
+  See the value description for COLOR above.
 
-                   To see all defined presets use 'color.presets'
+  SYNTAX:
+  COLOR_PRESET_<LABEL>=(<FOREGROUND> <BACKGROUND>)
+
+  To see all defined presets use 'color.presets'
+
 
 EXAMPLES:
-  First you need to source the file bash.
+  First you need to source the file [path]/color.class.sh.
   . [path]/color.class.sh
 
   (1)
