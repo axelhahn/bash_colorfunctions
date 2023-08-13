@@ -16,9 +16,10 @@
 # 2023-08-09  ahahn  0.2  hide output of regex test with grep
 # 2023-08-13  ahahn  0.3  introduce of color presets with foreground and background
 # 2023-08-13  ahahn  0.4  list presets, debug, count of colors
+# 2023-08-13  ahahn  0.5  support of RGB hex code
 # ======================================================================
 
-_VERSION=0.4
+_VERSION=0.5
 typeset -i COLOR_DEBUG; COLOR_DEBUG=0
 
 # ----------------------------------------------------------------------
@@ -113,6 +114,30 @@ function color.__iscolorvalue(){
     return 1
 }
 
+# test, if given value is an rgb hexcode eg. #80a0f0
+# param  string  color to test
+function color.__isrgbhex(){
+    if grep -iE "^#[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]$" >/dev/null <<< "$1" ; then
+        return 0
+    fi
+    return 1
+}
+
+# convert rgb hex code eg. #80a0f0 to 3 decimal values
+# output us a string with space separated values for red, green, blue
+# param  string  color as "#RRGGBB" to convert
+function color.__getrgb(){
+    local _r
+    local _g
+    local _b
+    if color.__isrgbhex "$1"; then
+        _r=$( cut -c 2,3 <<< "$1" )
+        _g=$( cut -c 4,5 <<< "$1" )
+        _b=$( cut -c 6,7 <<< "$1" )
+        echo "$((16#$_r)) $((16#$_g)) $((16#$_b))"
+    fi
+}
+
 # test, if given value is a color that can be one of
 # - colorname
 # - value 0..7
@@ -122,6 +147,7 @@ function color.__isacolor(){
     if color.__iscolorname "$1"; then return 0; fi
     if color.__iscolorcode "$1"; then return 0; fi
     if color.__iscolorvalue "$1"; then return 0; fi
+    if color.__isrgbhex "$1"; then return 0; fi
     color.__wd "is acolor: $1 --> No"
     return 1
 }
@@ -136,8 +162,12 @@ function color.__isapreset(){
 }
 
 # set foreground 
-# param  string  color 0..7 OR color name eg "black" or a valid color value eg "1;30"
-# param  integr  3 for for foreground or 4 for background colors
+# param  string  color as
+#                - basic color 0..7 OR 
+#                - color name eg. "black" OR 
+#                - a valid color value eg. "1;30" OR 
+#                - a hex code eg. "#10404f"
+# param  integer what to set; '3' for for foreground or '4' for background colors
 function color.__fgorbg(){
     local _color="$1"
     local _prefix="$2"
@@ -153,7 +183,15 @@ function color.__fgorbg(){
                 color.__wd "yep, ${_color} is a color value."
                 color.set "${_color}"
             else
-                >&2 echo "ERROR: color '${_color}' is not a name nor a value between 0..7 nor a valid color value."
+                if color.__isrgbhex "${_color}"; then
+                    local _r
+                    local _g
+                    local _b
+                    read -r _r _g _b <<< $( color.__getrgb "${_color}" )
+                    color.set "0;${_prefix}8;2;$_r;$_g;$_b"
+                else
+                    >&2 echo "ERROR: color '${_color}' is not a name nor a value between 0..7 nor a valid color value nor RGB."
+                fi
             fi
         fi
     fi
@@ -214,6 +252,7 @@ function color.help(){
       Author: Axel Hahn
       License: GNU GPL 3.0
       Source: <https://github.com/axelhahn/bash_colorfunctions>
+      Docs: <https://www.axel-hahn.de/docs/bash_colorfunctions/>
 
 
     FUNCTIONS:
@@ -266,6 +305,9 @@ function color.help(){
                          known values run 'color.list'
                        - a value 0..7 to set basic colors 30..37 (or 40..47)
                        - an ansi color value eg. "30" or "1;42"
+                       - RGB hexcode with '#' as prefix followed by 2 digit 
+                         hexcode for red, green and blue eg. "#10404f" 
+                         (like css rgb color codes)
       PRESET           a shortcut for a combination of foreground + background
                        color. 
                        COLOR_PRESET_<LABEL>=(<FOREGROUND> <BACKGROUND>)
@@ -305,6 +347,7 @@ function color.help(){
       (3)
       Use a custom preset:
         COLOR_PRESET_error=("white" "red")
+        ...
         color.echo "error" "ERROR: Something bad happened."
 
       This defines a preset named "error". "white" is a colorname
@@ -353,6 +396,7 @@ function color.list(){
     COLOR_DEBUG=$_debug
 }
 
+# little helper: sow defined presets and its preview
 function color.presets(){
     local _label
     local _value
@@ -454,9 +498,9 @@ function color.set(){
     for mycolor in $*
     do
         color.__wd "color.set: processing color value '${mycolor}'"
-        _out+="${mycolor}m"
+        _out+="${mycolor}"
     done
-    echo -en "\e[${_out}"
+    printf "\e[${_out}m"
 }
 
 # ----------------------------------------------------------------------
@@ -502,7 +546,7 @@ function color.print(){
         eval "_colors=\${$_colorvar[@]}"
         color.print $_colors $*
     else
-        >&2 echo -n "ERROR: Wrong color values detected. Command: colors.print $*"
+        >&2 echo -n "ERROR: Wrong color values detected. Command was: colors.print $*"
     fi
 }
 

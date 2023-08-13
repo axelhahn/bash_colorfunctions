@@ -3,7 +3,7 @@
 To see all available color functions you can call `color.help`
 
 ```txt
-$ . ./src/color.class.sh ; color.help
+$ . ./src/color.class.sh ; color.help                       
 _______________________________________________________________________________
 
    ###   ###  #      ###  #### 
@@ -11,7 +11,7 @@ _______________________________________________________________________________
   #     #   # #     #   # #### 
   #     #   # #     #   # #  # 
    ###   ###  #####  ###  #   # 
-_________________________________________________________________________/ v0.4
+_________________________________________________________________________/ v0.5
 
 HELP:
   color is a class like component for setting colors in your bash scripts.
@@ -19,6 +19,7 @@ HELP:
   Author: Axel Hahn
   License: GNU GPL 3.0
   Source: <https://github.com/axelhahn/bash_colorfunctions>
+  Docs: <https://www.axel-hahn.de/docs/bash_colorfunctions/>
 
 
 FUNCTIONS:
@@ -71,6 +72,9 @@ VALUES:
                      known values run 'color.list'
                    - a value 0..7 to set basic colors 30..37 (or 40..47)
                    - an ansi color value eg. "30" or "1;42"
+                   - RGB hexcode with '#' as prefix followed by 2 digit 
+                     hexcode for red, green and blue eg. "#10404f" 
+                     (like css rgb color codes)
   PRESET           a shortcut for a combination of foreground + background
                    color. 
                    COLOR_PRESET_<LABEL>=(<FOREGROUND> <BACKGROUND>)
@@ -110,6 +114,7 @@ EXAMPLES:
   (3)
   Use a custom preset:
     COLOR_PRESET_error=("white" "red")
+    ...
     color.echo "error" "ERROR: Something bad happened."
 
   This defines a preset named "error". "white" is a colorname
