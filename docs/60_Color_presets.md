@@ -21,6 +21,8 @@ COLOR_PRESET_ok=("white" "green")
 
 This defines the labels "error" and "ok".
 
+Don't set a label of an existing color like listed in 'color.list' - use describing strings.
+
 ### Usage
 
 You can use the preset name in `color.echo` and `color.print` eg.
