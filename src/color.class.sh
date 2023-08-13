@@ -4,12 +4,14 @@
 # COLORS
 #
 # a few shell functions for colored output
-#
+# 
 # ----------------------------------------------------------------------
-#
+# License: GPL 3.0
+# Docs https://www.axel-hahn.de/docs/bash_colorfunctions/
 # ----------------------------------------------------------------------
 # 2023-08-09  ahahn  0.1  initial lines
 # 2023-08-09  ahahn  0.2  hide output of regex test with grep
+# 2023-08-13  ahahn  0.3  introduce of color presets with foreground and background
 # ======================================================================
 
 _VERSION=0.2
@@ -19,26 +21,8 @@ COLOR_DEBUG=0
 # CONSTANTS
 # ----------------------------------------------------------------------
 
-declare -A COLOR_CODE
 declare -A BGCOLOR_CODE
-
-# foreground colors
-COLOR_CODE[black]="30"
-COLOR_CODE[red]="31"
-COLOR_CODE[green]="32"
-COLOR_CODE[brown]="33"
-COLOR_CODE[blue]="34"
-COLOR_CODE[purple]="35"
-COLOR_CODE[cyan]="36"
-COLOR_CODE[lightgray]="37"
-COLOR_CODE[darkgray]="1;30"
-COLOR_CODE[lightred]="1;31"
-COLOR_CODE[lightgreen]="1;32"
-COLOR_CODE[yellow]="1;33"
-COLOR_CODE[lightblue]="1;34"
-COLOR_CODE[lightpurple]="1;35"
-COLOR_CODE[lightcyan]="1;36"
-COLOR_CODE[white]="1;37"
+declare -A COLOR_CODE
 
 # background colors
 BGCOLOR_CODE[black]="40"
@@ -58,19 +42,50 @@ BGCOLOR_CODE[lightpurple]="1;45"
 BGCOLOR_CODE[lightcyan]="1;46"
 BGCOLOR_CODE[white]="1;47"
 
+# foreground colors
+COLOR_CODE[black]="30"
+COLOR_CODE[red]="31"
+COLOR_CODE[green]="32"
+COLOR_CODE[brown]="33"
+COLOR_CODE[blue]="34"
+COLOR_CODE[purple]="35"
+COLOR_CODE[cyan]="36"
+COLOR_CODE[lightgray]="37"
+COLOR_CODE[darkgray]="1;30"
+COLOR_CODE[lightred]="1;31"
+COLOR_CODE[lightgreen]="1;32"
+COLOR_CODE[yellow]="1;33"
+COLOR_CODE[lightblue]="1;34"
+COLOR_CODE[lightpurple]="1;35"
+COLOR_CODE[lightcyan]="1;36"
+COLOR_CODE[white]="1;37"
+
+# custom presets as array of foreground and background color
+#            +--- label is part of the variable
+#            |
+#            v
+COLOR_PRESET_error=("white" "red")
+COLOR_PRESET_ok=("white" "green")
 
 # ----------------------------------------------------------------------
 # PRIVATE FUNCTIONS
 # ----------------------------------------------------------------------
 
+# write debug output - if debugging is enabled
+# param  string  text to show
 function color.__wd(){
     test "$COLOR_DEBUG" = "1" && echo "DEBUG: $*"
 }
 
+# test, if given value is a known color name
+# param  string  colorname to test
 function color.__iscolorname(){
     test -n "${COLOR_CODE[$1]}" && return 0
     return 1
 }
+
+# test, if given value is a value 0..7
+# param  string  color to test
 function color.__iscolorcode(){
     test "$1" = "0" && return 0
     test "$1" = "1" && return 0
@@ -82,17 +97,35 @@ function color.__iscolorcode(){
     test "$1" = "7" && return 0
     return 1
 }
+
+# test, if given value is an ansi code
+# param  string  color to test
 function color.__iscolorvalue(){
     if grep -E "^([01];|)[34][0-7]$" >/dev/null <<< "$1" ; then
         return 0
     fi
     return 1
 }
+
+# test, if given value is a color that can be one of
+# - colorname
+# - value 0..7
+# - ansi code
+# param  string  color to test
 function color.__isacolor(){
     if color.__iscolorname "$1"; then return 0; fi
     if color.__iscolorcode "$1"; then return 0; fi
     if color.__iscolorvalue "$1"; then return 0; fi
     color.__wd "is acolor: $1 --> No"
+    return 1
+}
+
+# test, if given value is an existing preset
+# param  string  color to test
+function color.__isapreset(){
+    local _colorset
+    eval "_colorset=\$COLOR_PRESET_${1}" 
+    test -n "$_colorset" && return 0
     return 1
 }
 
@@ -119,6 +152,7 @@ function color.__fgorbg(){
         fi
     fi
 }
+
 # ----------------------------------------------------------------------
 # FUNCTIONS
 # ----------------------------------------------------------------------
@@ -264,10 +298,11 @@ function color.fg(){
 }
 
 # show a colored text without carriage return
-# param  string  foreground color as code / name / value
+# param  string  foreground color as code / name / value or preset
 # param  string  optional: background color as code / name / value
 # param  string  text to print
 function color.print(){
+    color.__wd "color.print $*"
     if color.__isacolor "$1"; then
         if color.__isacolor "$2"; then
             color.fg "$1" "$2"
@@ -279,6 +314,15 @@ function color.print(){
         fi
         echo -n "$*"
         color.reset
+    elif color.__isapreset "$1"; then
+        local _colorvar
+        local _colors
+        _colorvar="COLOR_PRESET_${1}" 
+        shift 1
+        eval "_colors=\${$_colorvar[@]}"
+        color.print $_colors $*
+    else
+        >&2 echo -n "ERROR: Wrong color values detected. Command: colors.print $*"
     fi
 }
 
@@ -287,6 +331,7 @@ function color.print(){
 # param  string  optional: background color as code / name / value
 # param  string  text to print
 function color.echo(){
+    color.__wd "color.echo $*"
     local _param1="$1"
     local _param2="$2"
     shift 1
@@ -327,6 +372,7 @@ function color.ansi(){
 
 # ----------------------------------------------------------------------
 
+# write ansicode to set color combination
 function color.set(){
     local _out=
     for mycolor in $*
