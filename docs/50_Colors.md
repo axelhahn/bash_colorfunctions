@@ -2,9 +2,9 @@
 
 ### List
 
-To see the color aa name or ansi code you can call `color.list`
+To see the colors, names or ansi code you can call `color.list`
 
-![Alt text](images/color_list.png)
+![List of color names and its values](images/color_list.png)
 
 ### Colors
 

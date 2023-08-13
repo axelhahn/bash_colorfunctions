@@ -11,7 +11,8 @@ In your script define add one variable per preset like that:
 
 ```txt
 # custom presets as array of foreground and background color
-#            +--- label is part of the variable
+#
+#            +--- the label is part of the variable
 #            |
 #            v
 COLOR_PRESET_error=("white" "red")
@@ -28,3 +29,9 @@ You can use the preset name in `color.echo` and `color.print` eg.
 color.echo "error" "ERROR: something happened"
 color.echo "ok" "OK"
 ```
+
+### List
+
+To list all defined presets you can call `color.presets`.
+
+![List of custom presets](images/presets_list.png)
