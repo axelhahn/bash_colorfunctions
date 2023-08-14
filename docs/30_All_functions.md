@@ -7,7 +7,7 @@
 To see all available color functions you can call `color.help`
 
 ```txt
-$ . ./src/color.class.sh ; color.help                       
+$ . ./src/color.class.sh ; NO_COLOR=1; color.help
 _______________________________________________________________________________
 
    ###   ###  #      ###  #### 
