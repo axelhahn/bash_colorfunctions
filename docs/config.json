@@ -17,7 +17,7 @@
             "basepath": "https://git-repo.iml.unibe.ch/iml-open-source/__PROJECT__/tree/master/docs"
         },
         "links": {
-            "Git Repo": "__GITURL__",
+            "Git Repo": "https://github.com/axelhahn/bash_colorfunctions",
             "Axels Docs": "https://www.axel-hahn.de/docs/"
         },
         "theme": "daux-blue",
