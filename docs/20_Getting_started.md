@@ -29,6 +29,8 @@ Then you can source it with a relative path
 . $( dirname $0 )/color.class.sh || exit 1
 ```
 
+Keep in mind that this method is unhandy to update the *color.class.sh*.
+
 ### Start coloring
 
 Let's start with echo of a colored text:

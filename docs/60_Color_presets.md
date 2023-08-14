@@ -9,6 +9,19 @@ The color values are written as array where the foreground is the 1st parameter 
 
 In your script define add one variable per preset like that:
 
+**Syntax**:
+
+```txt
+COLOR_PRESET_<LABEL>=(<FOREGROUND> <BACKGROUND>)
+```
+
+* LABEL - Don't set a label of an existing color like listed in 'color.list' - use describing strings.
+* FOREGROUND, BACKGROUND are color values. See the menu item -> [Colors](50_Colors.md). 
+
+Before the colorset of a preset is activated the colors will be reseted. An empty value for foreground or background will use the default colors.
+
+**Example**:
+
 ```shell
 # custom presets as array of foreground and background color
 #
@@ -17,19 +30,29 @@ In your script define add one variable per preset like that:
 #            v
 COLOR_PRESET_error=("white" "red")
 COLOR_PRESET_ok=("white" "green")
+COLOR_PRESET_cli=("blue")
 ```
 
-This defines the labels "error" and "ok".
-
-Don't set a label of an existing color like listed in 'color.list' - use describing strings.
+This defines 3 labels "error", "ok" and "cli".
 
 ### Usage
 
+#### Set preset colors
+
+```shell
+color.preset "cli"
+# execute something - its output will be green
+# ...
+color.reset
+```
+
+#### Show colored text
+
 You can use the preset name in `color.echo` and `color.print` eg.
 
-```txt
+```shell
 color.echo "error" "ERROR: something happened"
-color.echo "ok" "OK"
+color.echo "ok" "OK, action was successful."
 ```
 
 ### List
