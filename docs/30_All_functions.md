@@ -15,7 +15,7 @@ _______________________________________________________________________________
   #     #   # #     #   # #### 
   #     #   # #     #   # #  # 
    ###   ###  #####  ###  #   # 
-_________________________________________________________________________/ v0.7
+_________________________________________________________________________/ v0.8
 
 HELP:
   'color' is a class like component to simplify the handling of ansi colors and keeps
@@ -49,6 +49,9 @@ FUNCTIONS:
   color.fg COLOR (COLOR2)
                    set a foreground color; a 2nd parameter is optional to set
                    a background color too
+  color.preset PRESET
+                   Apply the color set of foreground and background of a given 
+                   preset name.
   color.echo COLOR|PRESET (COLOR2) TEXT
                    write a colored text with carriage return and reset colors
                    The 1st param must be a COLOR(code/ name) for the 
@@ -202,7 +205,7 @@ For COLOR values see -> [Colors](50_Colors.md)
 
 #### color.preset - Set a preset colorset
 
-Set the color set of foreground and background of a given preset.
+Apply the color set of foreground and background of a given preset.
 
 **Syntax**:
 
