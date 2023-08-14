@@ -1,7 +1,8 @@
 <html>
 <div class="hero">
   <h2>Welcome</h2>
-  Colorfunctions for shell scripts<br>
+  Class like funtions to set colors easily in your bash scripts. 
+
 </div>
 </html>
 
