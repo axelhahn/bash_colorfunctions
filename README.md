@@ -1,6 +1,9 @@
 # Bash: color functions
 
-Free software and Open source.
+'color' is a class like component to simplify the handling of ansi colors and keeps the color settings readable. 
+A set NO_COLOR=1 will be respected.
+
+Free software and open source.
 
 👤 Author: Axel Hahn \
 📄 Source: <https://github.com/axelhahn/bash_colorfunctions> \
@@ -8,9 +11,6 @@ Free software and Open source.
 📗 Docs: see <https://www.axel-hahn.de/docs/bash_colorfunctions>
 
 ---
-
-
-You get class like funtions to set foreground and backround colors easily in your bash scripts. 
 
 ## Quick tutorial
 
