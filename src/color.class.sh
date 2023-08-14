@@ -7,19 +7,21 @@
 # 
 # ----------------------------------------------------------------------
 # License: GPL 3.0
-# Docs https://www.axel-hahn.de/docs/bash_colorfunctions/
+# Source: <https://github.com/axelhahn/bash_colorfunctions>
+# Docs <https://www.axel-hahn.de/docs/bash_colorfunctions/>
 #
-# TODO:
-# - rgb colors -> https://unix.stackexchange.com/questions/269077/tput-setaf-color-table-how-to-determine-color-codes
+# Links:
+# - rgb colors: https://unix.stackexchange.com/questions/269077/tput-setaf-color-table-how-to-determine-color-codes
 # ----------------------------------------------------------------------
 # 2023-08-09  ahahn  0.1  initial lines
 # 2023-08-09  ahahn  0.2  hide output of regex test with grep
 # 2023-08-13  ahahn  0.3  introduce of color presets with foreground and background
 # 2023-08-13  ahahn  0.4  list presets, debug, count of colors
 # 2023-08-13  ahahn  0.5  support of RGB hex code
+# 2023-08-14  ahahn  0.6  fix setting fg and bg as RGB hex code
 # ======================================================================
 
-_VERSION=0.5
+_VERSION=0.6
 typeset -i COLOR_DEBUG; COLOR_DEBUG=0
 
 # ----------------------------------------------------------------------
@@ -188,7 +190,7 @@ function color.__fgorbg(){
                     local _g
                     local _b
                     read -r _r _g _b <<< $( color.__getrgb "${_color}" )
-                    color.set "0;${_prefix}8;2;$_r;$_g;$_b"
+                    color.set "${_prefix}8;2;$_r;$_g;$_b"
                 else
                     >&2 echo "ERROR: color '${_color}' is not a name nor a value between 0..7 nor a valid color value nor RGB."
                 fi
@@ -421,15 +423,15 @@ function color.presets(){
         echo "label      | foreground | background | example"
         echo "---------------------------------------------------------------------"
 
-        set | grep "^COLOR_PRESET_.*=(" | while read line
+        set | grep "^COLOR_PRESET_.*=(" | while read -r line
         do
-            _label=$( cut -f 1 -d '=' <<< $line | cut -f 3- -d '_')
-            _example=$( color.print $_label "example for peset '$_label'" )
+            _label=$( cut -f 1 -d '=' <<< "$line" | cut -f 3- -d '_')
+            _example=$( color.print "$_label" "example for peset '$_label'" )
             _colorvar="COLOR_PRESET_${_label}" 
             eval "_fg=\${$_colorvar[0]}"
             eval "_bg=\${$_colorvar[1]}"
 
-            printf "%-10s | %-10s | %-10s | %-50s\n"  $_label "${_fg}" "${_bg}" "$_example"
+            printf "%-10s | %-10s | %-10s | %-50s\n"  "$_label" "${_fg}" "${_bg}" "$_example"
         done
         echo "---------------------------------------------------------------------"
         echo
@@ -460,7 +462,7 @@ function color.fg(){
 
 # ----------------------------------------------------------------------
 
-# rest all colors to terminal default
+# reset all colors to terminal default
 function color.reset(){
     color.set "0"
 }
