@@ -19,9 +19,10 @@
 # 2023-08-13  ahahn  0.4  list presets, debug, count of colors
 # 2023-08-13  ahahn  0.5  support of RGB hex code
 # 2023-08-14  ahahn  0.6  fix setting fg and bg as RGB hex code
+# 2023-08-14  ahahn  0.7  remove color.ansi
 # ======================================================================
 
-_VERSION=0.6
+_VERSION=0.7
 typeset -i COLOR_DEBUG; COLOR_DEBUG=0
 
 # ----------------------------------------------------------------------
@@ -299,7 +300,6 @@ function color.help(){
       color.underline  start underline text
       color.blink      start blinking text
       color.invert     start inverted text
-      color.ansi ID    set ansi command
 
     VALUES:
       COLOR            a color; it can be...
@@ -478,16 +478,6 @@ function color.blink(){
 }
 function color.invert(){
     color.set "7"
-}
-
-# set Ansi code
-# - 0 	Normal Characters
-# - 1 	Bold Characters
-# - 4 	Underlined Characters
-# - 5 	Blinking Characters
-# - 7 	Reverse video Characters
-function color.ansi(){
-    color.set "$1"
 }
 
 # ----------------------------------------------------------------------
