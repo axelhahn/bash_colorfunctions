@@ -17,9 +17,10 @@
 # 2023-08-13  ahahn  0.5  support of RGB hex code
 # 2023-08-14  ahahn  0.6  fix setting fg and bg as RGB hex code
 # 2023-08-14  ahahn  0.7  remove color.ansi; respect NO_COLOR=1
+# 2023-08-14  ahahn  0.8  add function color.preset
 # ======================================================================
 
-_VERSION=0.7
+_VERSION=0.8
 typeset -i COLOR_DEBUG; COLOR_DEBUG=0
 
 # ----------------------------------------------------------------------
@@ -286,6 +287,9 @@ function color.help(){
       color.fg COLOR (COLOR2)
                        set a foreground color; a 2nd parameter is optional to set
                        a background color too
+      color.preset PRESET
+                       Apply the color set of foreground and background of a given 
+                       preset name.
       color.echo COLOR|PRESET (COLOR2) TEXT
                        write a colored text with carriage return and reset colors
                        The 1st param must be a COLOR(code/ name) for the 
@@ -463,6 +467,17 @@ function color.bg(){
     test -n "$2" && color.fg "$2"
 }
 
+# get a color of a preset
+# param  string   name of preset
+# param  integer  array index; 0= foreground; 1= background
+function color.__getpresetcolor(){
+    local _label=$1
+    local _index=$2
+    local _colorvar
+    _colorvar="COLOR_PRESET_${_label}" 
+    eval "echo \${$_colorvar[$_index]}"
+}
+
 # set foreground color
 # param  string  foreground color 0..7 OR color name eg "black" or a valid color value eg "1;30"
 # param  string  optional: background color
@@ -470,6 +485,22 @@ function color.fg(){
     color.__wd "$FUNCNAME $1"
     color.__fgorbg "$1" 3
     test -n "$2" && color.bg "$2"
+}
+
+
+# set colors of a preset
+# param  string  label of a preet
+function color.preset(){
+    if color.__isapreset "$1"; then
+        local _colorvar
+        local _colfg=$( color.__getpresetcolor "$1" 0)
+        local _colbg=$( color.__getpresetcolor "$1" 1)
+        color.reset
+        test -n "$_colfg" && color.__fgorbg "$_colfg" 3
+        test -n "$_colbg" && color.__fgorbg "$_colbg" 4
+    else
+        >&2 echo "ERROR: this value is not a valid preset: $1. See 'color.presets' to see current presets."
+    fi
 }
 
 # ----------------------------------------------------------------------
@@ -517,6 +548,7 @@ function color.set(){
             color.__wd "$FUNCNAME: processing color value '${mycolor}'"
             _out+="${mycolor}"
         done
+        color.__wd "$FUNCNAME: output is '\e[${_out}m'"
         printf "\e[${_out}m"
     else
         color.__wd "$FUNCNAME: skipping - coloring is disabled."
@@ -556,18 +588,14 @@ function color.print(){
             color.fg "$1"
             shift 1
         fi
-        echo -n "$*"
-        color.reset
     elif color.__isapreset "$1"; then
-        local _colorvar
-        local _colors
-        _colorvar="COLOR_PRESET_${1}" 
+        color.preset "$1"
         shift 1
-        eval "_colors=\${$_colorvar[@]}"
-        color.print $_colors $*
     else
         >&2 echo -n "ERROR: Wrong color values detected. Command was: colors.print $*"
     fi
+    echo -n "$*"
+    color.reset
 }
 
 # ======================================================================

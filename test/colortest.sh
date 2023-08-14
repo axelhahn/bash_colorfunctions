@@ -25,9 +25,16 @@ echo "Usage Presets"
 
 COLOR_PRESET_error=("white" "red")
 COLOR_PRESET_ok=("white" "green")
+COLOR_PRESET_cli=("blue")
 
 color.presets
 color.echo "ok" "OK, this is fine."
+
+color.echo "cli" "I am cli output"
+color.preset "cli"
+ls -l
+color.reset
+
 
 echo
 echo $_line

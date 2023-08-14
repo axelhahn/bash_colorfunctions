@@ -7,7 +7,7 @@
 To see all available color functions you can call `color.help`
 
 ```txt
-$ . ./src/color.class.sh ; color.help                       
+$ . ./src/color.class.sh ; NO_COLOR=1; color.help
 _______________________________________________________________________________
 
    ###   ###  #      ###  #### 
@@ -15,7 +15,7 @@ _______________________________________________________________________________
   #     #   # #     #   # #### 
   #     #   # #     #   # #  # 
    ###   ###  #####  ###  #   # 
-_________________________________________________________________________/ v0.7
+_________________________________________________________________________/ v0.8
 
 HELP:
   'color' is a class like component to simplify the handling of ansi colors and keeps
@@ -49,6 +49,9 @@ FUNCTIONS:
   color.fg COLOR (COLOR2)
                    set a foreground color; a 2nd parameter is optional to set
                    a background color too
+  color.preset PRESET
+                   Apply the color set of foreground and background of a given 
+                   preset name.
   color.echo COLOR|PRESET (COLOR2) TEXT
                    write a colored text with carriage return and reset colors
                    The 1st param must be a COLOR(code/ name) for the 
@@ -158,7 +161,22 @@ It does what you expect - the debugging will de disabled.
 To complete the debugging feature: this function shows if the debugging is on or off.
 
 
-### Colored output:
+### Colored output
+
+#### Introduction
+
+With these commands you can set the color(s) only. The output of following commands will be shown in this color. 
+
+* color.bg
+* color.fg
+* color.preset
+
+The coloring ends if you call `color.reset`.
+
+If you have a string that should be displayed in a colored way then you can print it with:
+
+* color.echo or
+* color.print
 
 #### color.bg - Set background
 
@@ -184,6 +202,18 @@ color.fg COLOR (COLOR2)
 ```
 
 For COLOR values see -> [Colors](50_Colors.md)
+
+#### color.preset - Set a preset colorset
+
+Apply the color set of foreground and background of a given preset.
+
+**Syntax**:
+
+```txt
+color.preset PRESET
+```
+
+See the menu item -> [Color Presets](60_Color_presets.md) for more information.
 
 #### color.echo - Write a colored text
 
@@ -215,12 +245,18 @@ see color.echo - color.print has the same parameters and does the same but witho
 
 Any set color or effect eg. with color.fg/ color.bg will be turned off.
 
+It is a shortcut for
+
+```shell
+printf "\e[0m"
+```
+
 #### color.set - Set colors
 
 This function sets multiple ansi colors or effects. It handles ANSI codes only and is the function that is used internally. It is more a low level function.
 
 I do NOT recommend not to use color.set. 
-Better use color.bg / color.fg / color.echo to have easy readable code.
+Better use color.bg / color.fg / color.preset / color.echo to have easy readable code.
 
 **Syntax**:
 
@@ -236,15 +272,35 @@ RAWCOLOR is an ansi color value eg. "30" (black foreground) or  "1;42" (lightgre
 #### color.blink
 
 Start blinking text.
+It is a shortcut for
+
+```shell
+printf "\e[5m"
+```
 
 #### color.bold
 
 Start bold text.
+It is a shortcut for
+
+```shell
+printf "\e[1m"
+```
 
 #### color.invert
 
 Start inverted text.
+It is a shortcut for
+
+```shell
+printf "\e[7m"
+```
 
 #### color.underline
 
 Start underline text.
+It is a shortcut for
+
+```shell
+printf "\e[4m"
+```
