@@ -420,7 +420,7 @@ function color.presets(){
         echo "List of presets:"
         echo
         echo "---------------------------------------------------------------------"
-        echo "label      | foreground | background | example"
+        echo "label      | foreground   | background   | example"
         echo "---------------------------------------------------------------------"
 
         set | grep "^COLOR_PRESET_.*=(" | while read -r line
@@ -431,7 +431,7 @@ function color.presets(){
             eval "_fg=\${$_colorvar[0]}"
             eval "_bg=\${$_colorvar[1]}"
 
-            printf "%-10s | %-10s | %-10s | %-50s\n"  "$_label" "${_fg}" "${_bg}" "$_example"
+            printf "%-10s | %-12s | %-12s | %-50s\n"  "$_label" "${_fg}" "${_bg}" "$_example"
         done
         echo "---------------------------------------------------------------------"
         echo
