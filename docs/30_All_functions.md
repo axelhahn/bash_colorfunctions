@@ -1,4 +1,8 @@
-## Help
+## All functions
+
+### Information
+
+#### color.help - Show help
 
 To see all available color functions you can call `color.help`
 
@@ -11,10 +15,11 @@ _______________________________________________________________________________
   #     #   # #     #   # #### 
   #     #   # #     #   # #  # 
    ###   ###  #####  ###  #   # 
-_________________________________________________________________________/ v0.6
+_________________________________________________________________________/ v0.7
 
 HELP:
-  color is a class like component for setting colors in your bash scripts.
+  'color' is a class like component to simplify the handling of ansi colors and keeps
+  the color settings readable. A set NO_COLOR=1 will be respected.
 
   Author: Axel Hahn
   License: GNU GPL 3.0
@@ -60,11 +65,10 @@ FUNCTIONS:
 
   ---------- Other:
 
-  color.bold       start bold text
-  color.underline  start underline text
   color.blink      start blinking text
+  color.bold       start bold text
   color.invert     start inverted text
-  color.ansi ID    set ansi command
+  color.underline  start underline text
 
 VALUES:
   COLOR            a color; it can be...
@@ -75,19 +79,14 @@ VALUES:
                    - RGB hexcode with '#' as prefix followed by 2 digit 
                      hexcode for red, green and blue eg. "#10404f" 
                      (like css rgb color codes)
-  PRESET           a shortcut for a combination of foreground + background
-                   color. 
-                   COLOR_PRESET_<LABEL>=(<FOREGROUND> <BACKGROUND>)
-
-                   example:
-                   COLOR_PRESET_error=("white" "red")
+  PRESET           Name of a custom preset; see DEFINE PRESETS below.
   RAWCOLOR         an ansi color value eg. "30" (black foreground) or 
                    "1;42" (lightgreen background)
 
 
 DEFINE PRESETS:
   A shortcut for a combination of foreground + background color. The label
-  ist part of a bash variable with the prefix 'COLOR_PRESET_'.
+  is part of a bash variable with the prefix 'COLOR_PRESET_'.
   The value is a bash array with 2 colors for foreground and background. 
   See the value description for COLOR above.
 
@@ -109,15 +108,143 @@ EXAMPLES:
 
   (2)
   show a red error message
-    color.echo "red" "ERROR: Something bad happened."
+    color.echo "red" "ERROR: Something went wrong."
 
   (3)
   Use a custom preset:
     COLOR_PRESET_error=("white" "red")
-    ...
-    color.echo "error" "ERROR: Something bad happened."
+    color.echo "error" "ERROR: Something went wrong."
 
   This defines a preset named "error". "white" is a colorname
   for the foreground color, "red" ist the background.
 
+INFO: NO_COLOR=1 was set. The coloring functionality is DISBALED.
+
 ```
+
+#### color.list - Show color names
+
+`color.list` Shows a table with valid color names and gives a preview.
+
+You can use different styles to define a color. See the menu item -> [Colors](50_Colors.md).
+
+#### color.presets - Show custom presets
+
+Show all defined presets.
+See the menu item -> [Color Presets](60_Color_presets.md) for more information.
+
+#### color.count - Get count of colors
+
+It shows the count of colors in the current terminal
+
+### Debugging
+
+This feature you don't need for usage in your scripts.
+
+If colors were not set as expected there is a possibility to enable debugging.
+
+A few functions in *color.class.sh* have a function `color.__wd TEXT` (wd = write debug output). This text will be shown with a prefix "DEBUG:".
+
+#### color.debugon - Enable debugging
+
+This enables debugging.
+
+#### color.debugoff - Disable debugging
+
+It does what you expect - the debugging will de disabled.
+
+#### color.debugstatus - Show debugstatus
+
+To complete the debugging feature: this function shows if the debugging is on or off.
+
+
+### Colored output:
+
+#### color.bg - Set background
+
+Set a background color. The 2nd parameter is optional to set
+a foreground color too.
+
+**Syntax**:
+
+```txt
+color.bg COLOR (COLOR2)
+```
+For COLOR values see -> [Colors](50_Colors.md)
+
+#### color.fg - Set font color
+
+Set a foreground color. The 2nd parameter is optional to set
+a background color too.
+
+**Syntax**:
+
+```txt
+color.fg COLOR (COLOR2)
+```
+
+For COLOR values see -> [Colors](50_Colors.md)
+
+#### color.echo - Write a colored text
+
+Writes a colored text with carriage return and resets colors afterards.
+
+To prevent a carriage return use `color.print`.
+
+**Syntax**:
+
+```txt
+color.echo COLOR|PRESET (COLOR2) TEXT
+```
+
+The 1st param must be a COLOR(code/ name) for the 
+foreground or a label of a preset.
+
+The 2nd is optional and will be used as color for the background, but can be skipped.
+
+Everything behind is text for the output.
+
+For COLOR values see -> [Colors](50_Colors.md)
+For using PRESET see -> [Color Presets](60_Color_presets.md)
+
+#### color.print - write a colored text
+
+see color.echo - color.print has the same parameters and does the same but without carriage return.
+
+#### color.reset - Reset colors
+
+Any set color or effect eg. with color.fg/ color.bg will be turned off.
+
+#### color.set - Set colors
+
+This function sets multiple ansi colors or effects. It handles ANSI codes only and is the function that is used internally. It is more a low level function.
+
+I do NOT recommend not to use color.set. 
+Better use color.bg / color.fg / color.echo to have easy readable code.
+
+**Syntax**:
+
+```txt
+color.set RAWCOLOR (RAWCOLOR2 (... RAWCOLOR_N))
+```
+
+RAWCOLOR is an ansi color value eg. "30" (black foreground) or  "1;42" (lightgreen background).
+
+
+### Other
+
+#### color.blink
+
+Start blinking text.
+
+#### color.bold
+
+Start bold text.
+
+#### color.invert
+
+Start inverted text.
+
+#### color.underline
+
+Start underline text.

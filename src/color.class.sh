@@ -8,10 +8,7 @@
 # ----------------------------------------------------------------------
 # License: GPL 3.0
 # Source: <https://github.com/axelhahn/bash_colorfunctions>
-# Docs <https://www.axel-hahn.de/docs/bash_colorfunctions/>
-#
-# Links:
-# - rgb colors: https://unix.stackexchange.com/questions/269077/tput-setaf-color-table-how-to-determine-color-codes
+# Docs: <https://www.axel-hahn.de/docs/bash_colorfunctions/>
 # ----------------------------------------------------------------------
 # 2023-08-09  ahahn  0.1  initial lines
 # 2023-08-09  ahahn  0.2  hide output of regex test with grep
@@ -19,9 +16,10 @@
 # 2023-08-13  ahahn  0.4  list presets, debug, count of colors
 # 2023-08-13  ahahn  0.5  support of RGB hex code
 # 2023-08-14  ahahn  0.6  fix setting fg and bg as RGB hex code
+# 2023-08-14  ahahn  0.7  remove color.ansi; respect NO_COLOR=1
 # ======================================================================
 
-_VERSION=0.6
+_VERSION=0.7
 typeset -i COLOR_DEBUG; COLOR_DEBUG=0
 
 # ----------------------------------------------------------------------
@@ -150,7 +148,7 @@ function color.__isacolor(){
     if color.__iscolorcode "$1"; then return 0; fi
     if color.__iscolorvalue "$1"; then return 0; fi
     if color.__isrgbhex "$1"; then return 0; fi
-    color.__wd "is acolor: $1 --> No"
+    color.__wd "$FUNCNAME is acolor: $1 --> No"
     return 1
 }
 
@@ -163,7 +161,14 @@ function color.__isapreset(){
     return 1
 }
 
-# set foreground 
+# respect NO_COLOR=1
+# return 1 if colors are allowed to be used.
+function color.__usecolor(){
+    test "$NO_COLOR" = "1" && return 1
+    return 0
+}
+
+# set foreground or background
 # param  string  color as
 #                - basic color 0..7 OR 
 #                - color name eg. "black" OR 
@@ -173,6 +178,7 @@ function color.__isapreset(){
 function color.__fgorbg(){
     local _color="$1"
     local _prefix="$2"
+    color.__wd "$FUNCNAME $1 $2"
     if color.__iscolorname "${_color}"; then
         color.__wd "yep, ${_color} is a color name."
         test "$_prefix" = "3" && color.set "${COLOR_CODE[${_color}]}"
@@ -211,12 +217,12 @@ function color.count(){
 # enable debug flag
 function color.debugon(){
     COLOR_DEBUG=1
-    color.__wd "color.debugon - debugging is enabled now"
+    color.__wd "$FUNCNAME - debugging is enabled now"
 }
 
 # disable debug flag
 function color.debugoff(){
-    color.__wd "color.debugoff - disabling debugging now"
+    color.__wd "$FUNCNAME - disabling debugging now"
     COLOR_DEBUG=0
 }
 
@@ -249,7 +255,8 @@ function color.help(){
 
     sed "s#^    ##g" << EOH
     HELP:
-      color is a class like component for setting colors in your bash scripts.
+      'color' is a class like component to simplify the handling of ansi colors and keeps
+      the color settings readable. A set NO_COLOR=1 will be respected.
 
       Author: Axel Hahn
       License: GNU GPL 3.0
@@ -295,11 +302,10 @@ function color.help(){
 
       ---------- Other:
 
-      color.bold       start bold text
-      color.underline  start underline text
       color.blink      start blinking text
+      color.bold       start bold text
       color.invert     start inverted text
-      color.ansi ID    set ansi command
+      color.underline  start underline text
 
     VALUES:
       COLOR            a color; it can be...
@@ -310,19 +316,14 @@ function color.help(){
                        - RGB hexcode with '#' as prefix followed by 2 digit 
                          hexcode for red, green and blue eg. "#10404f" 
                          (like css rgb color codes)
-      PRESET           a shortcut for a combination of foreground + background
-                       color. 
-                       COLOR_PRESET_<LABEL>=(<FOREGROUND> <BACKGROUND>)
-
-                       example:
-                       COLOR_PRESET_error=("white" "red")
+      PRESET           Name of a custom preset; see DEFINE PRESETS below.
       RAWCOLOR         an ansi color value eg. "30" (black foreground) or 
                        "1;42" (lightgreen background)
 
 
     DEFINE PRESETS:
       A shortcut for a combination of foreground + background color. The label
-      ist part of a bash variable with the prefix 'COLOR_PRESET_'.
+      is part of a bash variable with the prefix 'COLOR_PRESET_'.
       The value is a bash array with 2 colors for foreground and background. 
       See the value description for COLOR above.
 
@@ -344,18 +345,29 @@ function color.help(){
 
       (2)
       show a red error message
-        color.echo "red" "ERROR: Something bad happened."
+        color.echo "red" "ERROR: Something went wrong."
 
       (3)
       Use a custom preset:
         COLOR_PRESET_error=("white" "red")
-        ...
-        color.echo "error" "ERROR: Something bad happened."
+        color.echo "error" "ERROR: Something went wrong."
 
       This defines a preset named "error". "white" is a colorname
       for the foreground color, "red" ist the background.
 
 EOH
+
+    if [ -n "$NO_COLOR" ]; then
+        echo -n "INFO: NO_COLOR=$NO_COLOR was set. The coloring functionality is "
+        if ! color.__usecolor; then
+            echo "DISBALED."
+        else
+            echo "ENABLED (must be 1 to disable)."
+        fi
+        echo
+    else
+        echo "INFO: NO_COLOR will be respected - but it is not set."
+    fi
 
     COLOR_DEBUG=$_debug
 }
@@ -446,7 +458,7 @@ function color.presets(){
 # param  string  backround color 0..7 OR color name eg "black" or a valid color value eg "1;30"
 # param  string  optional: foreground color
 function color.bg(){
-    color.__wd "color.bg $1"
+    color.__wd "$FUNCNAME $1"
     color.__fgorbg "$1" 4
     test -n "$2" && color.fg "$2"
 }
@@ -455,7 +467,7 @@ function color.bg(){
 # param  string  foreground color 0..7 OR color name eg "black" or a valid color value eg "1;30"
 # param  string  optional: background color
 function color.fg(){
-    color.__wd "color.fg $1"
+    color.__wd "$FUNCNAME $1"
     color.__fgorbg "$1" 3
     test -n "$2" && color.bg "$2"
 }
@@ -464,30 +476,32 @@ function color.fg(){
 
 # reset all colors to terminal default
 function color.reset(){
+    color.__wd "$FUNCNAME"
     color.set "0"
 }
 
+# start bold text
 function color.bold(){
+    color.__wd "$FUNCNAME"
     color.set "1"
 }
+
+# start underline text
 function color.underline(){
+    color.__wd "$FUNCNAME"
     color.set "4"
 }
+
+# start blinking text
 function color.blink(){
+    color.__wd "$FUNCNAME"
     color.set "5"
 }
-function color.invert(){
-    color.set "7"
-}
 
-# set Ansi code
-# - 0 	Normal Characters
-# - 1 	Bold Characters
-# - 4 	Underlined Characters
-# - 5 	Blinking Characters
-# - 7 	Reverse video Characters
-function color.ansi(){
-    color.set "$1"
+# start inverted text
+function color.invert(){
+    color.__wd "$FUNCNAME"
+    color.set "7"
 }
 
 # ----------------------------------------------------------------------
@@ -497,12 +511,16 @@ function color.ansi(){
 # param  string  color N as ansi value
 function color.set(){
     local _out=
-    for mycolor in $*
-    do
-        color.__wd "color.set: processing color value '${mycolor}'"
-        _out+="${mycolor}"
-    done
-    printf "\e[${_out}m"
+    if color.__usecolor; then
+        for mycolor in $*
+        do
+            color.__wd "$FUNCNAME: processing color value '${mycolor}'"
+            _out+="${mycolor}"
+        done
+        printf "\e[${_out}m"
+    else
+        color.__wd "$FUNCNAME: skipping - coloring is disabled."
+    fi
 }
 
 # ----------------------------------------------------------------------
@@ -514,7 +532,7 @@ function color.set(){
 # param  string  optional: background color as code / name / value
 # param  string  text to print
 function color.echo(){
-    color.__wd "color.echo $*"
+    color.__wd "$FUNCNAME $*"
     local _param1="$1"
     local _param2="$2"
     shift 1
@@ -528,7 +546,7 @@ function color.echo(){
 # param  string  optional: background color as code / name / value
 # param  string  text to print
 function color.print(){
-    color.__wd "color.print $*"
+    color.__wd "$FUNCNAME $*"
     if color.__isacolor "$1"; then
         if color.__isacolor "$2"; then
             color.fg "$1" "$2"
