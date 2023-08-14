@@ -1,4 +1,4 @@
-## Usage
+## Getting started
 
 ### Source the script
 
@@ -33,7 +33,9 @@ Then you can source it with a relative path
 
 Let's start with echo of a colored text:
 
-`color.echo "white" "green" "Yep, it seems to work!"`
+```shell
+color.echo "white" "green" "Yep, it seems to work!"
+```
 
 You also can initialize a wanted color. Then execute your commands that will drop their output in that color. Finally reset the color.
 As an example I set the foreground color (fg) to blue (ansi code 34):

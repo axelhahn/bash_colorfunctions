@@ -1,7 +1,9 @@
 <html>
 <div class="hero">
   <h2>Welcome</h2>
-  Class like funtions to set colors easily in your bash scripts. 
+  'color' is a class like component to simplify the handling of ansi colors and keeps
+  the color settings readable.
+  A set NO_COLOR=1 will be respected.
 
 </div>
 </html>
