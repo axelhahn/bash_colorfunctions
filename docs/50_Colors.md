@@ -46,9 +46,7 @@ Set gray background: `color.bg "7"`<br>
 Set cyan foreground: `color.fg "cyan"` <br>
 Set white background: `color.bg "white"`
 <br>
-* **RGB hex code** (1) - if you are familiar with css color hexcodes you maybe like this syntax.
+* **RGB hex code** - if you are familiar with css color hexcodes you maybe like this syntax.
   * use a `#` as prefix
   * followed by 2 digits for the colors red, green and blue
 Set a blue background: `color.bg "#10404f"`
-
-(1) WIP: At the moment you can set only foreground OR background with a rgb color code. When applying a rgb color for foreground it resets the color for background. If yoz set a rgb value for background it resets the color of foreground. If you are an ansi color guru you can help me to fix it.
