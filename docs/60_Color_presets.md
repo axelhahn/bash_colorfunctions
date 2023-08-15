@@ -41,7 +41,7 @@ This defines 3 labels "error", "ok" and "cli".
 
 ```shell
 color.preset "cli"
-# execute something - its output will be green
+# execute something - its output will be blue
 # ...
 color.reset
 ```
