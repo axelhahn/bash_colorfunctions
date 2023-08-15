@@ -1,3 +1,12 @@
+<!-- START-ADD-TTY-PLAYER -->
+<html>
+    <script src=ttyrec/webcomponents-lite.min.js></script>
+    <link rel=stylesheet href=ttyrec/tty-player.css>
+    <script src=ttyrec/term.min.js></script>
+    <script src=ttyrec/tty-player.min.js></script>
+</html>
+<!-- END-ADD-TTY-PLAYER -->
+
 ## Installation
 
 ### Get all sources
@@ -10,7 +19,9 @@ $ cd /opt/
 $ git clone https://github.com/axelhahn/bash_colorfunctions.git
 ```
 
-Using git is the prefered way to update with a simple `git pull``.
+Using git is the prefered way to update with a simple `git pull`.
+
+<tty-player controls rows=20 cols=90 src=files/install_git.ttyrec poster=npt:0.3></tty-player>
 
 #### Zip
 
