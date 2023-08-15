@@ -17,7 +17,7 @@
 # 2023-08-13  ahahn  0.5  support of RGB hex code
 # 2023-08-14  ahahn  0.6  fix setting fg and bg as RGB hex code
 # 2023-08-14  ahahn  0.7  remove color.ansi; respect NO_COLOR=1
-# 2023-08-14  ahahn  0.8  add function color.preset
+# 2023-08-16  ahahn  0.8  add function color.preset
 # ======================================================================
 
 _VERSION=0.8
