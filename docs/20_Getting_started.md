@@ -1,3 +1,12 @@
+<!-- START-ADD-TTY-PLAYER -->
+<html>
+    <script src=ttyrec/webcomponents-lite.min.js></script>
+    <link rel=stylesheet href=ttyrec/tty-player.css>
+    <script src=ttyrec/term.min.js></script>
+    <script src=ttyrec/tty-player.min.js></script>
+</html>
+<!-- END-ADD-TTY-PLAYER -->
+
 ## Getting started
 
 ### Source the script
@@ -50,3 +59,10 @@ color.reset
 
 You need an overview over all available functions and colors.
 See "All functions" and "Colors" on the left.
+
+### Demo
+
+**Remark**: You can pause the video to read the lines of the demo and rewind too.
+
+<tty-player controls rows=30 cols=105 src=files/getting_started.ttyrec poster=npt:20></tty-player>
+
