@@ -160,4 +160,4 @@ start underline text
 [line: 521](https://github.com/axelhahn/bash_colorfunctions/blob/main/src/color.class.sh#L521)
 
 - - -
-Generated with [Bashdoc](https://github.com/axelhahn/bashdoc) v0.6
+Generated with [Bashdoc](https://github.com/axelhahn/bashdoc) v0.7
