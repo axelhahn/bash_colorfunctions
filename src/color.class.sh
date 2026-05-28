@@ -18,9 +18,10 @@
 # 2023-08-14  ahahn  0.6  fix setting fg and bg as RGB hex code
 # 2023-08-14  ahahn  0.7  remove color.ansi; respect NO_COLOR=1
 # 2023-08-16  ahahn  0.8  add function color.preset
+# 2026-05-29  ahahn  0.9  fix error message on wrong preset
 # ======================================================================
 
-_VERSION=0.8
+_VERSION=0.9
 typeset -i COLOR_DEBUG; COLOR_DEBUG=0
 
 # ----------------------------------------------------------------------
@@ -592,7 +593,7 @@ function color.print(){
         color.preset "$1"
         shift 1
     else
-        >&2 echo -n "ERROR: Wrong color values detected. Command was: colors.print $*"
+        >&2 echo -n "ERROR: Wrong color values detected. Command was: color.print $*"
     fi
     echo -n "$*"
     color.reset
